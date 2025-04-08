@@ -31,7 +31,7 @@ const App = () => {
     };
 
     fetchMovies();
-  }, [searchTerm]);
+  }, [searchTerm, API_KEY]);
 
   return (
     <div className="bg-gray-200 h-screen ">
