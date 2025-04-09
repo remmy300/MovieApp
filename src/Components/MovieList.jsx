@@ -1,28 +1,80 @@
-import React from "react";
+import React, { useState } from "react";
+import { XCircle } from "lucide-react";
 
 const MovieList = ({ movies }) => {
+  const [playingMovieId, setPlayingMovieId] = useState(null);
+  const [trailers, setTrailers] = useState({});
+  const API_KEY = import.meta.env.VITE_API_KEY;
+
+  const fetchTrailer = async (movieId) => {
+    if (trailers[movieId]) {
+      setPlayingMovieId(movieId);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${API_KEY}&language=en-US`
+      );
+      const data = await response.json();
+      const trailer = data.results.find(
+        (vid) => vid.type === "Trailer" && vid.site === "YouTube"
+      );
+
+      if (trailer) {
+        setTrailers((prev) => ({
+          ...prev,
+          [movieId]: `https://www.youtube.com/embed/${trailer.key}?autoplay=1`,
+        }));
+        setPlayingMovieId(movieId);
+      } else {
+        alert("Trailer not available.");
+      }
+    } catch (error) {
+      console.error("Error fetching trailer:", error);
+    }
+  };
+
   return (
-    <div>
-      <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 overflow-visible">
-        {movies.map((movie) => (
-          <div
-            key={movie.id}
-            className="bg-gray-800 rounded-lg min-h-[200px] p-4 transform hover:scale-105 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/40 transition-all duration-300 ease-in-out"
-          >
+    <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4">
+      {movies.map((movie) => (
+        <div
+          key={movie.id}
+          className="relative bg-gray-900 rounded-2xl p-4 shadow-md transition-all duration-300 hover:shadow-blue-400/30 group"
+        >
+          {playingMovieId === movie.id && trailers[movie.id] ? (
+            <div className="relative animate-fade-in">
+              <iframe
+                className="rounded-xl w-full aspect-video shadow-lg border border-gray-300 shadow-blue-500/30"
+                src={trailers[movie.id]}
+                title={movie.title}
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+              ></iframe>
+
+              <button
+                onClick={() => setPlayingMovieId(null)}
+                className="absolute top-2 right-2 bg-black bg-opacity-60 hover:bg-opacity-80 text-white p-1.5 rounded-full transition-all"
+              >
+                <XCircle size={24} />
+              </button>
+            </div>
+          ) : (
             <img
               src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
               alt={movie.title}
-              className="rounded-lg mb-2"
+              className="rounded-xl w-full cursor-pointer transition-all duration-200 group-hover:scale-105"
+              onClick={() => fetchTrailer(movie.id)}
             />
-            <h3 className="text-white md:text-2xl text-lg font-semibold">
+          )}
+          <div className="mt-3">
+            <h3 className="text-white text-lg font-semibold line-clamp-2">
               {movie.title}
             </h3>
-            <p className="text-gray-400 md:text-2xl lg:text-lg">
-              {movie.release_date}
-            </p>
+            <p className="text-gray-400 text-sm mt-1">{movie.release_date}</p>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 };
