@@ -41,6 +41,7 @@ const App = () => {
         <img src={hero_image} alt="hero" className="object-cover " />
         <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         {loading ? "Loading..." : <MovieList movies={movies} />}
+        <MovieList />
       </div>
     </div>
   );
