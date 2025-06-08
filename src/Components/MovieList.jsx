@@ -4,13 +4,26 @@ import MovieCard from "./MovieCard";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import Button from "@mui/material/Button";
 
-const MovieList = () => {
+const MovieList = ({ searchTerm }) => {
+  console.log("search term:" + searchTerm);
   const [playingMovieId, setPlayingMovieId] = useState(null);
   const [trailers, setTrailers] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const API_KEY = import.meta.env.VITE_API_KEY;
 
+  const fetchMovies = async ({ pageParam = 1 }) => {
+    const baseUrl = `https://api.themoviedb.org/3`;
+    const endpoint = searchTerm
+      ? `/search/movie?query=${encodeURIComponent(searchTerm)}`
+      : `/movie/popular`;
+
+    const url = `${baseUrl}${endpoint}&api_key=${API_KEY}&language=en-US&page=${pageParam}`;
+
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`API Error: ${res.status}`);
+    return res.json();
+  };
   // Inifinite Query
 
   const {
@@ -18,18 +31,11 @@ const MovieList = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    // error: fetchError,
+    status,
+    error: fetchError,
   } = useInfiniteQuery({
-    queryKey: ["movies"],
-    queryFn: async ({ pageParam = 1 }) => {
-      const res = await fetch(
-        `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=en-US&page=${pageParam}`
-      );
-
-      console.log(res);
-
-      return res.json();
-    },
+    queryKey: ["movies", searchTerm],
+    queryFn: fetchMovies,
 
     getNextPageParam: (lastPage) => {
       return lastPage.page < lastPage.total_pages
@@ -81,6 +87,18 @@ const MovieList = () => {
 
   console.log(movies);
 
+  if (status === "pending") {
+    return (
+      <div className="flex items-center justify-center">
+        <ClipLoader size={30} />
+      </div>
+    );
+  }
+
+  if (status === "error") {
+    return <div>Error:{fetchError.message}</div>;
+  }
+
   return (
     <>
       {loading && (
@@ -104,12 +122,10 @@ const MovieList = () => {
       </div>
 
       <div className="flex justify-center items-center">
-        {isFetchingNextPage ? (
-          <ClipLoader size={30} color="black" />
-        ) : (
-          <Button variant="contained" onClick={() => fetchNextPage()}>
-            {hasNextPage ? "load more" : "nothing more to load"}
-          </Button>
+        {isFetchingNextPage && (
+          <div>
+            <ClipLoader size={30} color="black" />
+          </div>
         )}
       </div>
     </>
