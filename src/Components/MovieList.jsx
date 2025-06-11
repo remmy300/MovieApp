@@ -2,11 +2,23 @@ import React, { useEffect, useMemo, useState } from "react";
 import { ClipLoader } from "react-spinners";
 import MovieCard from "./MovieCard";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import Button from "@mui/material/Button";
 import { useRef } from "react";
 
-const MovieList = ({ searchTerm }) => {
-  console.log("search term:" + searchTerm);
+const MovieList = ({
+  searchTerm,
+  selectedCountry,
+  selectedType,
+  selectedGenre,
+  sortOrder,
+}) => {
+  console.log("Current filters:", {
+    searchTerm,
+    selectedGenre,
+    selectedCountry,
+    selectedType,
+    sortOrder,
+  });
+
   const [playingMovieId, setPlayingMovieId] = useState(null);
   const [trailers, setTrailers] = useState({});
   const [loading, setLoading] = useState(false);
@@ -17,22 +29,34 @@ const MovieList = ({ searchTerm }) => {
 
   const fetchMovies = async ({ pageParam = 1 }) => {
     const baseUrl = `https://api.themoviedb.org/3`;
-    const isSearch = Boolean(searchTerm);
-    const endpoint = isSearch
-      ? `/search/movie?query=${encodeURIComponent(searchTerm)}`
-      : `/movie/popular`;
+    const type = selectedType || "movie";
+    let endpoint = "";
 
-    // Use '&' if endpoint already has '?', otherwise use '?'
-    const connector = endpoint.includes("?") ? "&" : "?";
+    const params = new URLSearchParams({
+      api_key: API_KEY,
+      language: "en-US",
+      page: pageParam,
+    });
 
-    const url = `${baseUrl}${endpoint}${connector}api_key=${API_KEY}&language=en-US&page=${pageParam}`;
+    if (selectedGenre) params.append("with_genres", selectedGenre);
+    if (selectedCountry) {
+      params.append("with_origin_country", selectedCountry);
+      params.append("region", selectedCountry);
+    }
+    if (sortOrder) params.append("sort_by", sortOrder);
 
+    if (searchTerm) {
+      endpoint = `/search/${type}`;
+      params.append("query", searchTerm);
+    } else {
+      endpoint = `/discover/${type}`;
+    }
+
+    const url = `${baseUrl}${endpoint}?${params.toString()}`;
     const res = await fetch(url);
     if (!res.ok) throw new Error(`API Error: ${res.status}`);
     return res.json();
   };
-
-  // Inifinite Query
 
   const {
     data,
@@ -42,9 +66,15 @@ const MovieList = ({ searchTerm }) => {
     status,
     error: fetchError,
   } = useInfiniteQuery({
-    queryKey: ["movies", searchTerm],
+    queryKey: [
+      "movies",
+      searchTerm,
+      selectedGenre,
+      selectedCountry,
+      selectedType,
+      sortOrder,
+    ],
     queryFn: fetchMovies,
-
     getNextPageParam: (lastPage) => {
       return lastPage.page < lastPage.total_pages
         ? lastPage.page + 1
@@ -52,7 +82,7 @@ const MovieList = ({ searchTerm }) => {
     },
     staleTime: 5 * 60 * 100,
     keepPreviousData: false,
-    enabled: !!searchTerm || searchTerm === "",
+    enabled: true,
   });
 
   useEffect(() => {
@@ -75,8 +105,6 @@ const MovieList = ({ searchTerm }) => {
       }
     };
   }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
-
-  // Trailer fetching
 
   const fetchTrailer = React.useCallback(
     async (movieId) => {
@@ -118,8 +146,6 @@ const MovieList = ({ searchTerm }) => {
   const movies = useMemo(() => {
     return data?.pages.flatMap((page) => page.results) || [];
   }, [data]);
-
-  console.log(movies);
 
   if (status === "pending") {
     return (
