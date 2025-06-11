@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ClipLoader } from "react-spinners";
 import MovieCard from "./MovieCard";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import Button from "@mui/material/Button";
+import { useRef } from "react";
 
 const MovieList = ({ searchTerm }) => {
   console.log("search term:" + searchTerm);
@@ -12,18 +13,25 @@ const MovieList = ({ searchTerm }) => {
   const [error, setError] = useState(null);
   const API_KEY = import.meta.env.VITE_API_KEY;
 
+  const observerRef = useRef();
+
   const fetchMovies = async ({ pageParam = 1 }) => {
     const baseUrl = `https://api.themoviedb.org/3`;
-    const endpoint = searchTerm
+    const isSearch = Boolean(searchTerm);
+    const endpoint = isSearch
       ? `/search/movie?query=${encodeURIComponent(searchTerm)}`
       : `/movie/popular`;
 
-    const url = `${baseUrl}${endpoint}&api_key=${API_KEY}&language=en-US&page=${pageParam}`;
+    // Use '&' if endpoint already has '?', otherwise use '?'
+    const connector = endpoint.includes("?") ? "&" : "?";
+
+    const url = `${baseUrl}${endpoint}${connector}api_key=${API_KEY}&language=en-US&page=${pageParam}`;
 
     const res = await fetch(url);
     if (!res.ok) throw new Error(`API Error: ${res.status}`);
     return res.json();
   };
+
   // Inifinite Query
 
   const {
@@ -42,7 +50,31 @@ const MovieList = ({ searchTerm }) => {
         ? lastPage.page + 1
         : undefined;
     },
+    staleTime: 5 * 60 * 100,
+    keepPreviousData: false,
+    enabled: !!searchTerm || searchTerm === "",
   });
+
+  useEffect(() => {
+    const currentRef = observerRef.current;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.5, rootMargin: "100px" }
+    );
+
+    if (currentRef) observer.observe(currentRef);
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
 
   // Trailer fetching
 
@@ -83,7 +115,9 @@ const MovieList = ({ searchTerm }) => {
     [trailers, API_KEY]
   );
 
-  const movies = data?.pages.flatMap((page) => page.results) || [];
+  const movies = useMemo(() => {
+    return data?.pages.flatMap((page) => page.results) || [];
+  }, [data]);
 
   console.log(movies);
 
@@ -121,7 +155,7 @@ const MovieList = ({ searchTerm }) => {
         ))}
       </div>
 
-      <div className="flex justify-center items-center">
+      <div ref={observerRef} className="flex justify-center items-center h-20">
         {isFetchingNextPage && (
           <div>
             <ClipLoader size={30} color="black" />
