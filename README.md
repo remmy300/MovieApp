@@ -2,6 +2,9 @@
 
 A modern movie browsing app built with React, Tailwind CSS, and MUI. This project is a work in progress — I'm actively adding new features and improving performance with each update.
 
+
+"Proper API filtering requires correct parameter formatting (using URLSearchParams), understanding endpoint-specific behaviors (like TMDB's dual country filters), and including all filter states in React Query's dependency array to trigger accurate refetches."
+
 ---
 
 ## 🔧 Tech Stack
@@ -25,6 +28,9 @@ A modern movie browsing app built with React, Tailwind CSS, and MUI. This projec
 - 🎨 Responsive design using Tailwind + MUI
 - 🧩 Modular and reusable components
 - 📱 Mobile-first layout with consistent styling
+- 🎬 Fetches movies and TV shows by genre, type, and country
+- 🔄 Dynamic filtering with responsive UI
+- ⏳ **Debounced Search** to reduce unnecessary API calls
 
 ---
 
@@ -35,6 +41,9 @@ A modern movie browsing app built with React, Tailwind CSS, and MUI. This projec
 - Structuring scalable React apps with reusable UI components
 - Combining Tailwind and MUI effectively for modern UI
 - Managing UI state and side effects in React
+- API Filtering**: Use `URLSearchParams` for robust URL construction, combine relevant parameters (e.g., TMDB's `with_origin_country` + `region`), and validate all filter inputs.  
+- State Management**: Include all filter states in React Query's `queryKey` to auto-trigger refetches when filters change.  
+- Debugging**: Log final API URLs to verify parameter correctness and handle empty/edge cases.
 
 ---
 

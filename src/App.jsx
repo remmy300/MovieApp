@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import hero_image from "../src/assets/hero-image.png";
-import Search from "./Components/Search";
-import MovieList from "./Components/MovieList";
-import FilterBar from "./Components/FilterBar";
+import { Routes, Route } from "react-router-dom";
+import Home from "./Pages/Home";
+import MovieDetailsPage from "./Pages/MovieDetailsPage";
 
 const App = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -27,29 +26,27 @@ const App = () => {
   }, [selectedGenre, selectedCountry, selectedType, sortOrder]);
 
   return (
-    <div className="bg-gray-200 h-screen ">
-      <div>
-        <img src={hero_image} alt="hero" className="object-cover " />
-        <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-        <FilterBar
-          selectedGenre={selectedGenre}
-          setSelectedGenre={setSelectedGenre}
-          selectedCountry={selectedCountry}
-          setSelectedCountry={setSelectedCountry}
-          selectedType={selectedType}
-          setSelectedType={setSelectedType}
-          sortOrder={sortOrder}
-          setSortOrder={setSortOrder}
+    <div className="bg-gray-200 min-h-screen">
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <Home
+              selectedGenre={selectedGenre}
+              setSelectedGenre={setSelectedGenre}
+              selectedCountry={selectedCountry}
+              setSelectedCountry={setSelectedCountry}
+              selectedType={selectedType}
+              setSelectedType={setSelectedType}
+              sortOrder={sortOrder}
+              setSortOrder={setSortOrder}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+            />
+          }
         />
-        <MovieList
-          searchTerm={searchTerm}
-          selectedGenre={selectedGenre}
-          selectedCountry={selectedCountry}
-          selectedType={selectedType}
-          setSelectedType={setSelectedType}
-          sortOrder={sortOrder}
-        />
-      </div>
+        <Route path="/movie/:id" element={<MovieDetailsPage />} />
+      </Routes>
     </div>
   );
 };

@@ -9,7 +9,7 @@ const Search = ({ setSearchTerm }) => {
     setSearchTerm(debounceQuery);
   }, [debounceQuery, setSearchTerm]);
   return (
-    <div className="flex justify-center items-center h-full bg-gray-800 ">
+    <div className="flex justify-end items-end h-full bg-gray-800 ">
       <div className="relative">
         <FaSearch className=" absolute right-2 top-3 transform-translate-y-1/2 text-gray-300" />
         <input
