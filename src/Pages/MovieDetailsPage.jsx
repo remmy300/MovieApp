@@ -1,5 +1,8 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import MovieBreadcrumb from "../Components/MovieBreadcrumb";
+import { Modal, Box, IconButton } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
 const MovieDetailsPage = () => {
   const { id } = useParams();
@@ -7,6 +10,7 @@ const MovieDetailsPage = () => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const API_KEY = import.meta.env.VITE_API_KEY;
 
@@ -52,7 +56,6 @@ const MovieDetailsPage = () => {
   const trailer = videos.find(
     (video) => video.type === "Trailer" && video.site === "YouTube"
   );
-  // ) || videos.find((video) => video.site === "YouTube");
 
   return (
     <div className="max-w-6xl mx-auto p-4">
@@ -71,19 +74,86 @@ const MovieDetailsPage = () => {
           <span className="ml-4 text-gray-900">({movie.vote_count} votes)</span>
         </div>
 
+        <MovieBreadcrumb movie={movie} />
+
         {trailer && (
-          <div className="mt-6  text-gray-900">
-            <h2 className="text-xl font-semibold mb-2">Trailer</h2>
-            <div className="aspect-video overflow-hidden rounded-lg w-full">
-              <iframe
-                src={`https://www.youtube.com/embed/${trailer.key}`}
-                title={`${movie.title} Trailer`}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className=" w-full h-full"
-              />
+          <>
+            <div className="mt-2 text-gray-900">
+              <h2 className="text-xl font-semibold mb-2">Trailer</h2>
+
+              <div
+                className="aspect-video overflow-hidden rounded-lg w-full relative cursor-pointer group  "
+                onClick={() => setIsModalOpen(true)}
+              >
+                <img
+                  src={`https://img.youtube.com/vi/${trailer.key}/hqdefault.jpg`}
+                  alt={`${movie.title} Trailer Thumbnail`}
+                  className="w-full h-full object-cover"
+                />
+
+                <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-50 transition-opacity duration-300 z-0" />
+
+                <div className="absolute inset-0 flex items-center justify-center z-10">
+                  <div className="bg-white p-4 rounded-full shadow-lg">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-10 w-10 text-red-600"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
+
+            <Modal
+              open={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              aria-labelledby="trailer-modal"
+              aria-describedby="modal-youtube-player"
+            >
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  bgcolor: "background.paper",
+                  boxShadow: 24,
+                  borderRadius: 2,
+                  outline: "none",
+                  width: { xs: "90%", md: "70%" },
+                }}
+              >
+                <IconButton
+                  onClick={() => setIsModalOpen(false)}
+                  sx={{
+                    position: "absolute",
+                    top: 8,
+                    right: 8,
+                    zIndex: 10,
+                    color: "white",
+                  }}
+                >
+                  <CloseIcon />
+                </IconButton>
+
+                <div className="aspect-video w-full">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src={`https://www.youtube.com/embed/${trailer.key}?autoplay=1`}
+                    title={`${movie.title} Trailer`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="w-full h-full rounded-lg"
+                  />
+                </div>
+              </Box>
+            </Modal>
+          </>
         )}
 
         {movie.genres?.length > 0 && (
@@ -99,7 +169,7 @@ const MovieDetailsPage = () => {
           </div>
         )}
 
-        <h2 className="text-xl  mt-6 mb-2 text-gray-900 font-semibold">
+        <h2 className="text-xl mt-6 mb-2 text-gray-900 font-semibold">
           Overview
         </h2>
         <p className="text-gray-900 font-semibold">
