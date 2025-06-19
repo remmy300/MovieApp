@@ -7,7 +7,7 @@ const MovieCard = ({ movie }) => {
 
   return (
     <div
-      className="relative bg-gray-900 rounded-2xl p-4 shadow-md transition-all duration-300 hover:shadow-blue-400/30 group cursor-pointer"
+      className="relative  rounded-2xl p-4 shadow-md transition-all duration-300 hover:shadow-blue-400/30 group cursor-pointer"
       onClick={() => navigate(`/movie/${movie.id}`)}
     >
       <div className="relative">
@@ -26,15 +26,15 @@ const MovieCard = ({ movie }) => {
       </div>
 
       <div className="mt-3">
-        <h3 className="text-white text-lg font-semibold line-clamp-2">
+        <h3 className="dark:text-white text-gray-900 text-lg font-semibold line-clamp-2">
           {movie.title}
         </h3>
-        <p className="text-gray-400 text-sm mt-1">
+        <p className="dark:text-gray-200 text-gray-800 text-sm mt-1">
           {new Date(movie.release_date).toLocaleDateString()}
         </p>
         <div className="flex items-center mt-1">
           <span className="text-yellow-400 text-sm mr-1">⭐</span>
-          <span className="text-white text-sm">
+          <span className="dark:text-white text-gray-900 text-sm">
             {movie.vote_average?.toFixed(1)}
           </span>
         </div>

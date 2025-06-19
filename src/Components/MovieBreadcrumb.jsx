@@ -1,4 +1,3 @@
-// components/MovieBreadcrumb.jsx
 import { Breadcrumbs, Link, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
@@ -8,26 +7,34 @@ const MovieBreadcrumb = ({ movie }) => {
   return (
     <Breadcrumbs
       aria-label="breadcrumb"
-      sx={{ color: "black", px: 4, py: 4 }}
+      sx={{
+        color: "black",
+        px: 4,
+        py: 4,
+
+        ".dark &": { color: "white" },
+      }}
       separator="/"
     >
       <Link
         underline="hover"
-        color="inherit"
         onClick={() => navigate("/")}
-        sx={{ cursor: "pointer" }}
+        className="cursor-pointer text-black dark:text-white"
       >
         Home
       </Link>
+
       <Link
         underline="hover"
-        color="inherit"
         onClick={() => navigate("/movies")}
-        sx={{ cursor: "pointer" }}
+        className="cursor-pointer text-black dark:text-white"
       >
         Movies
       </Link>
-      <Typography color="text.primary">{movie.title}</Typography>
+
+      <Typography className="text-black dark:text-white">
+        {movie.title}
+      </Typography>
     </Breadcrumbs>
   );
 };

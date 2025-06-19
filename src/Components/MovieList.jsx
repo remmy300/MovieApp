@@ -162,7 +162,7 @@ const MovieList = ({
   return (
     <div className="space-y-6">
       {movies.length === 0 && !isFetchingNextPage && (
-        <div className="text-center py-20 text-gray-500">
+        <div className="text-center py-20 text-gray-500 dark:text-gray-200">
           No movies found. Try different filters.
         </div>
       )}
@@ -183,7 +183,9 @@ const MovieList = ({
       <div ref={observerRef} className="py-10">
         {isFetchingNextPage && <ClipLoader />}
         {!hasNextPage && movies.length > 0 && (
-          <p className="text-center text-gray-500">No more movies to load</p>
+          <p className="text-center text-gray-500 dark:text-gray-200">
+            No more movies to load
+          </p>
         )}
       </div>
     </div>

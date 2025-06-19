@@ -19,21 +19,35 @@ const FilterBar = ({
   sortOrder,
   setSortOrder,
 }) => {
-  const { data: genres = [], isLoading } = useGenres(selectedType || "movie");
+  const { data: genres = [] } = useGenres(selectedType || "movie");
+
+  const commonStyles = {
+    minWidth: 120,
+    m: 1,
+    "& .MuiInputBase-root": {
+      color: "text.primary",
+    },
+    "& .MuiOutlinedInput-notchedOutline": {
+      borderColor: "divider",
+    },
+    "&:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: "primary.main",
+    },
+    "& .MuiSvgIcon-root": {
+      color: "text.primary",
+    },
+  };
 
   return (
-    <Box display={"flex"} flexWrap={"wrap"} p={2} gap={3}>
-      <FormControl
-        sx={{ m: 1, minWidth: 120 }}
-        size="small"
-        disabled={isLoading}
-      >
+    <Box display="flex" flexWrap="wrap" p={2} gap={3}>
+      {/* Genre */}
+      <FormControl size="small" sx={commonStyles}>
         <InputLabel id="genre-label">Genre</InputLabel>
         <Select
           labelId="genre-label"
           value={selectedGenre}
           label="Genre"
-          onChange={(event) => setSelectedGenre(event.target.value)}
+          onChange={(e) => setSelectedGenre(e.target.value)}
         >
           <MenuItem value="">
             <em>All Genres</em>
@@ -46,7 +60,8 @@ const FilterBar = ({
         </Select>
       </FormControl>
 
-      <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+      {/* Country */}
+      <FormControl size="small" sx={commonStyles}>
         <InputLabel id="country-label">Country</InputLabel>
         <Select
           labelId="country-label"
@@ -57,15 +72,16 @@ const FilterBar = ({
           <MenuItem value="">
             <em>All Countries</em>
           </MenuItem>
-          <MenuItem value="US">US</MenuItem>
-          <MenuItem value="IN">India</MenuItem>
-          <MenuItem value="KR">Korea</MenuItem>
-          <MenuItem value="JP">Japan</MenuItem>
-          <MenuItem value="KE">Kenya</MenuItem>
+          {["US", "IN", "KR", "JP", "KE"].map((code) => (
+            <MenuItem key={code} value={code}>
+              {code}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
 
-      <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+      {/* Type */}
+      <FormControl size="small" sx={commonStyles}>
         <InputLabel id="type-label">Type</InputLabel>
         <Select
           labelId="type-label"
@@ -81,7 +97,8 @@ const FilterBar = ({
         </Select>
       </FormControl>
 
-      <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+      {/* Sort */}
+      <FormControl size="small" sx={commonStyles}>
         <InputLabel id="sort-label">Sort</InputLabel>
         <Select
           labelId="sort-label"
@@ -98,10 +115,20 @@ const FilterBar = ({
           <MenuItem value="release_date.asc">Oldest</MenuItem>
         </Select>
       </FormControl>
+
+      {/* Reset Button */}
       <Button
         variant="outlined"
-        size="small"
-        sx={{ alignSelf: "center", m: 1 }}
+        size="medium"
+        sx={{
+          alignSelf: "center",
+          m: 1,
+          color: "text.primary",
+          borderColor: "divider",
+          "&:hover": {
+            borderColor: "text.secondary",
+          },
+        }}
         onClick={() => {
           setSelectedGenre("");
           setSelectedCountry("");
